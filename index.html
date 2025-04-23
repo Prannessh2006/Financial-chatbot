@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finance Chatbot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #2196f3 0%, #00bcd4 100%);
+      transition: background-color 0.3s ease;
+    }
+
+    body.dark {
+      background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+    }
+
+    body.dark .chat-section,
+    body.dark .category-button,
+    body.dark .fun-fact {
+      background: #1e1e1e;
+      color: #ffffff;
+    }
+
+    body.dark .chat-input {
+      background: #2c2c2c;
+    }
+
+    body.dark .chat-input input {
+      background: #333;
+      color: #fff;
+    }
+
+    body.dark .chat-input input::placeholder {
+      color: #adb5bd;
+    }
+
+    body.dark .message-bubble {
+      background: #2c2c2c;
+      color: #ffffff;
+    }
+
+    body.dark .chat-message.bot .message-bubble {
+      background: #263238;
+      color: #ffffff;
+    }
+
+    body.dark .chat-message.user .message-bubble {
+      background: #1565c0;
+      color: #ffffff;
+    }
+
+    body.dark .category-button {
+      background: #1e1e1e;
+    }
+
+    body.dark .category-button span {
+      color: #ffffff;
+    }
+
+    body.dark .category-button:hover {
+      background: #263238;
+    }
+
+    body.dark .fun-fact h3 {
+      color: #90caf9;
+    }
+
+    body.dark .fun-fact p {
+      color: #e0e0e0;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 20px auto;
+      padding: 0 20px;
+      position: relative;
+    }
+
+    .toggle-container {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+    }
+
+    .dark-toggle {
+      background: rgba(255, 255, 255, 0.2);
+      padding: 8px 16px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+
+    .dark-toggle:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    .header {
+      text-align: center;
+      color: white;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+    }
+
+    .main-content {
+      display: grid;
+      grid-template-columns: 1fr 300px;
+      gap: 20px;
+    }
+
+    .chat-section {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+    }
+
+    .chat-body {
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      padding-right: 10px;
+    }
+
+    .chat-input {
+      display: flex;
+      gap: 10px;
+      background: #f8f9fa;
+      padding: 15px;
+      border-radius: 15px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .chat-input button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      background: #2196f3;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .chat-input button:hover {
+      transform: translateY(-2px);
+    }
+
+    .sidebar {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+
+    .category-button {
+      background: white;
+      border: none;
+      border-radius: 15px;
+      padding: 25px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .category-button span:first-child {
+      font-size: 24px;
+    }
+
+    .category-button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 16px rgba(33, 150, 243, 0.15);
+      background: #e3f2fd;
+    }
+
+    .fun-fact {
+      background: white;
+      border-radius: 15px;
+      padding: 25px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      position: relative;
+      width: 100%;
+    }
+
+    .fun-fact h3 {
+      color: #2196f3;
+      margin-top: 0;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.2em;
+      padding-right: 45px;
+      white-space: nowrap;
+    }
+
+    .fun-fact p {
+      margin: 0;
+      color: #546e7a;
+      line-height: 1.5;
+      font-size: 0.95em;
+      transition: opacity 0.3s ease;
+      min-height: 44px;
+    }
+
+    .next-tip-btn {
+      position: absolute;
+      right: 25px;
+      top: 23px;
+      background: #e3f2fd;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      color: #2196f3;
+      font-size: 18px;
+      box-shadow: 0 2px 8px rgba(33, 150, 243, 0.15);
+    }
+
+    .next-tip-btn:hover {
+      background: #2196f3;
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+    }
+
+    body.dark .next-tip-btn {
+      background: #263238;
+      color: #90caf9;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    body.dark .next-tip-btn:hover {
+      background: #90caf9;
+      color: #263238;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .next-tip-btn svg {
+      width: 16px;
+      height: 16px;
+      transition: transform 0.3s ease;
+    }
+
+    .next-tip-btn:hover svg {
+      transform: rotate(180deg);
+    }
+
+    .tip-fade {
+      animation: tipFade 0.5s ease;
+    }
+
+    @keyframes tipFade {
+      0% { opacity: 0; transform: translateY(10px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    .chat-message {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .chat-message .avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-size: cover;
+    }
+
+    .chat-message.bot .avatar {
+      background-image: url('Img.jpg');
+      background-color: #e3f2fd;
+    }
+
+    .chat-message.user {
+      flex-direction: row-reverse;
+    }
+
+    .chat-message.user .avatar {
+      background-image: url('Img2.jpg');
+      background-color: #e3f2fd;
+    }
+
+    .message-bubble {
+      background: #e3f2fd;
+      padding: 12px 20px;
+      border-radius: 15px;
+      max-width: 70%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .chat-message.user .message-bubble {
+      background: #2196f3;
+      color: white;
+    }
+
+    .chat-message.bot .message-bubble {
+      background: #e3f2fd;
+      color: #37474f;
+    }
+
+    .names {
+      font-size: 12px;
+      color: white;
+      text-align: center;
+      opacity: 0.9;
+      margin-top: 5px;
+    }
+
+    .calculator-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .calculator-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+
+    body.dark .calculator-content {
+      background: #1e1e1e;
+      color: white;
+    }
+
+    .close-calculator {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #666;
+    }
+
+    body.dark .close-calculator {
+      color: #fff;
+    }
+
+    .calculator-form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .calculator-form input, .calculator-form select {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    body.dark .calculator-form input, 
+    body.dark .calculator-form select {
+      background: #2c2c2c;
+      border-color: #444;
+      color: white;
+    }
+
+    .calculator-form button {
+      padding: 12px;
+      background: #2196f3;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .calculator-result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e3f2fd;
+      border-radius: 8px;
+      display: none;
+    }
+
+    body.dark .calculator-result {
+      background: #263238;
+    }
+
+    .calculator-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .calculator-tab {
+      padding: 10px 20px;
+      background: #e3f2fd;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    body.dark .calculator-tab {
+      background: #263238;
+      color: white;
+    }
+
+    .calculator-tab.active {
+      background: #2196f3;
+      color: white;
+    }
+
+    body.dark .calculator-tab.active {
+      background: #1565c0;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="toggle-container">
+      <div class="dark-toggle" onclick="toggleDarkMode()">
+        <span id="theme-icon">🌞</span>
+        <span>Theme</span>
+      </div>
+    </div>
+    <div class="header">
+      <h1>Need help with Finance? 💰</h1>
+      <div class="names">Prannessh KVA (12315207) | Pratyay Das (12300476) | Akshat Sahay (12304012)</div>
+    </div>
+    
+    <div class="main-content">
+      <div class="chat-section">
+        <div class="chat-body" id="chat-body">
+          <div class="chat-message bot">
+            <div class="avatar"></div>
+            <div class="message-bubble">
+              Hi there! 😊 Ready to learn about finance today? Choose a category below or ask me anything about money management!
+            </div>
+          </div>
+        </div>
+        <div class="chat-input">
+          <input type="text" id="user-input" placeholder="Type your financial question here...">
+          <button onclick="sendMessage()">Send</button>
+        </div>
+      </div>
+
+      <div class="sidebar">
+        <div class="category-grid">
+          <button class="category-button" onclick="useTip('Tell me about budgeting basics')">
+            <span>📊</span>
+            <span>Budgeting</span>
+          </button>
+          <button class="category-button" onclick="useTip('How to start investing')">
+            <span>📈</span>
+            <span>Investing</span>
+          </button>
+          <button class="category-button" onclick="useTip('Credit score tips')">
+            <span>💳</span>
+            <span>Credit</span>
+          </button>
+          <button class="category-button" onclick="useTip('Debt management strategies')">
+            <span>💰</span>
+            <span>Debt</span>
+          </button>
+          <button class="category-button" onclick="openCalculator()">
+            <span>🧮</span>
+            <span>Calculator</span>
+          </button>
+        </div>
+
+        <div class="fun-fact">
+          <h3>💡 Financial Tip of the Day</h3>
+          <button class="next-tip-btn" onclick="nextTip()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.3"/>
+            </svg>
+          </button>
+          <p id="tip-text"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calculator-modal" id="calculatorModal">
+    <div class="calculator-content">
+      <button class="close-calculator" onclick="closeCalculator()">×</button>
+      <div class="calculator-tabs">
+        <button class="calculator-tab active" onclick="switchCalculator('simple')">Simple Interest</button>
+        <button class="calculator-tab" onclick="switchCalculator('compound')">Compound Interest</button>
+        <button class="calculator-tab" onclick="switchCalculator('fd')">FD Calculator</button>
+      </div>
+      <div id="simpleCalculator" class="calculator-form">
+        <input type="number" id="principal" placeholder="Principal Amount" required>
+        <input type="number" id="rate" placeholder="Interest Rate (%)" required>
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="time" placeholder="Time Period" required>
+          <select id="timeUnit">
+            <option value="days">Days</option>
+            <option value="months">Months</option>
+            <option value="years">Years</option>
+          </select>
+        </div>
+        <button onclick="calculateSimpleInterest()">Calculate</button>
+        <div class="calculator-result" id="simpleResult"></div>
+      </div>
+      <div id="compoundCalculator" class="calculator-form" style="display: none;">
+        <input type="number" id="compoundPrincipal" placeholder="Principal Amount" required>
+        <input type="number" id="compoundRate" placeholder="Interest Rate (%)" required>
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="compoundTime" placeholder="Time Period" required>
+          <select id="compoundTimeUnit">
+            <option value="years">Years</option>
+          </select>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <select id="compoundFrequency">
+            <option value="1">Annually</option>
+            <option value="2">Semi-Annually</option>
+            <option value="4">Quarterly</option>
+            <option value="12">Monthly</option>
+          </select>
+        </div>
+        <button onclick="calculateCompoundInterest()">Calculate</button>
+        <div class="calculator-result" id="compoundResult"></div>
+      </div>
+      <div id="fdCalculator" class="calculator-form" style="display: none;">
+        <input type="number" id="fdPrincipal" placeholder="Principal Amount" required>
+        <input type="number" id="fdRate" placeholder="Interest Rate (%)" required>
+        <div style="display: flex; gap: 10px;">
+          <input type="number" id="fdTime" placeholder="Time Period" required>
+          <select id="fdTimeUnit">
+            <option value="months">Months</option>
+            <option value="years">Years</option>
+          </select>
+        </div>
+        <button onclick="calculateFD()">Calculate</button>
+        <div class="calculator-result" id="fdResult"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const financialTips = [
+      "The 50/30/20 rule: 50% on needs, 30% on wants, 20% on savings! 💰",
+      "Start an emergency fund with 3-6 months of expenses 🏦",
+      "Pay off high-interest debt first to save money long-term 💳",
+      "Invest early to benefit from compound interest 📈",
+      "Track all expenses for better budget control 📊",
+      "Set up automatic savings to build wealth effortlessly 🎯",
+      "Review your credit report every 4 months for free 📋",
+      "Save at least 15% of income for retirement 👴",
+      "Use cashback cards for regular purchases wisely 💵",
+      "Create specific savings goals for better motivation 🎯"
+    ];
+
+    let currentTipIndex = Math.floor(Math.random() * financialTips.length);
+
+    function showTip() {
+      const tipText = document.getElementById('tip-text');
+      tipText.style.opacity = '0';
+      
+      setTimeout(() => {
+        tipText.textContent = financialTips[currentTipIndex];
+        tipText.style.opacity = '1';
+        tipText.classList.add('tip-fade');
+      }, 300);
+
+      setTimeout(() => {
+        tipText.classList.remove('tip-fade');
+      }, 800);
+    }
+
+    function nextTip() {
+      currentTipIndex = (currentTipIndex + 1) % financialTips.length;
+      showTip();
+    }
+
+    // Show initial tip
+    showTip();
+
+    // Change tip every 30 seconds
+    setInterval(nextTip, 30000);
+
+    function appendMessage(sender, text) {
+      const chatBody = document.getElementById("chat-body");
+      const msg = document.createElement("div");
+      msg.className = `chat-message ${sender}`;
+
+      const avatar = document.createElement("div");
+      avatar.className = "avatar";
+
+      const bubble = document.createElement("div");
+      bubble.className = "message-bubble";
+      bubble.innerText = text;
+
+      msg.appendChild(avatar);
+      msg.appendChild(bubble);
+      chatBody.appendChild(msg);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("user-input");
+      const message = input.value.trim();
+      if (!message) return;
+
+      appendMessage("user", message);
+      input.value = "";
+
+      const loading = document.createElement("div");
+      loading.className = "chat-message bot";
+      loading.innerHTML = `
+        <div class="avatar"></div>
+        <div class="message-bubble">Typing...</div>`;
+      document.getElementById("chat-body").appendChild(loading);
+      document.getElementById("chat-body").scrollTop = 9999;
+
+      setTimeout(() => {
+        fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message })
+        })
+          .then(res => res.json())
+          .then(data => {
+            loading.remove();
+            appendMessage("bot", data.reply);
+          });
+      }, 900);
+    }
+
+    function useTip(tip) {
+      const input = document.getElementById("user-input");
+      input.value = tip;
+      input.focus();
+    }
+
+    function toggleDarkMode() {
+      document.body.classList.toggle('dark');
+      const themeIcon = document.getElementById('theme-icon');
+      themeIcon.textContent = document.body.classList.contains('dark') ? '🌙' : '🌞';
+    }
+
+    document.getElementById("user-input").addEventListener("keypress", function (e) {
+      if (e.key === "Enter") sendMessage();
+    });
+
+    function openCalculator() {
+      document.getElementById('calculatorModal').style.display = 'flex';
+    }
+
+    function closeCalculator() {
+      document.getElementById('calculatorModal').style.display = 'none';
+    }
+
+    function switchCalculator(type) {
+      const simpleTab = document.querySelector('.calculator-tab:nth-child(1)');
+      const compoundTab = document.querySelector('.calculator-tab:nth-child(2)');
+      const fdTab = document.querySelector('.calculator-tab:nth-child(3)');
+      const simpleCalc = document.getElementById('simpleCalculator');
+      const compoundCalc = document.getElementById('compoundCalculator');
+      const fdCalc = document.getElementById('fdCalculator');
+
+      // Reset all tabs and calculators
+      [simpleTab, compoundTab, fdTab].forEach(tab => tab.classList.remove('active'));
+      [simpleCalc, compoundCalc, fdCalc].forEach(calc => calc.style.display = 'none');
+
+      // Activate selected tab and calculator
+      if (type === 'simple') {
+        simpleTab.classList.add('active');
+        simpleCalc.style.display = 'flex';
+      } else if (type === 'compound') {
+        compoundTab.classList.add('active');
+        compoundCalc.style.display = 'flex';
+      } else {
+        fdTab.classList.add('active');
+        fdCalc.style.display = 'flex';
+      }
+    }
+
+    function calculateSimpleInterest() {
+      const principal = parseFloat(document.getElementById('principal').value);
+      const rate = parseFloat(document.getElementById('rate').value);
+      const time = parseFloat(document.getElementById('time').value);
+      const timeUnit = document.getElementById('timeUnit').value;
+
+      if (isNaN(principal) || isNaN(rate) || isNaN(time)) {
+        alert('Please enter valid numbers');
+        return;
+      }
+
+      let timeInYears = time;
+      if (timeUnit === 'months') {
+        timeInYears = time / 12;
+      } else if (timeUnit === 'days') {
+        timeInYears = time / 365;
+      }
+
+      const interest = (principal * rate * timeInYears) / 100;
+      const total = principal + interest;
+
+      const result = document.getElementById('simpleResult');
+      result.style.display = 'block';
+      result.innerHTML = `
+        <p>Principal Amount: ₹${principal.toFixed(2)}</p>
+        <p>Interest Rate: ${rate}%</p>
+        <p>Time Period: ${time} ${timeUnit}</p>
+        <p>Total Interest: ₹${interest.toFixed(2)}</p>
+        <p>Total Amount: ₹${total.toFixed(2)}</p>
+      `;
+    }
+
+    function calculateCompoundInterest() {
+      const principal = parseFloat(document.getElementById('compoundPrincipal').value);
+      const rate = parseFloat(document.getElementById('compoundRate').value);
+      const time = parseFloat(document.getElementById('compoundTime').value);
+      const frequency = parseInt(document.getElementById('compoundFrequency').value);
+
+      if (isNaN(principal) || isNaN(rate) || isNaN(time)) {
+        alert('Please enter valid numbers');
+        return;
+      }
+
+      const amount = principal * Math.pow((1 + (rate/100)/frequency), frequency * time);
+      const interest = amount - principal;
+
+      const result = document.getElementById('compoundResult');
+      result.style.display = 'block';
+      result.innerHTML = `
+        <p>Principal Amount: ₹${principal.toFixed(2)}</p>
+        <p>Interest Rate: ${rate}%</p>
+        <p>Time Period: ${time} years</p>
+        <p>Compounding Frequency: ${getFrequencyText(frequency)}</p>
+        <p>Total Interest: ₹${interest.toFixed(2)}</p>
+        <p>Total Amount: ₹${amount.toFixed(2)}</p>
+      `;
+    }
+
+    function getFrequencyText(frequency) {
+      switch(frequency) {
+        case 1: return 'Annually';
+        case 2: return 'Semi-Annually';
+        case 4: return 'Quarterly';
+        case 12: return 'Monthly';
+        default: return 'Annually';
+      }
+    }
+
+    function calculateFD() {
+      const principal = parseFloat(document.getElementById('fdPrincipal').value);
+      const rate = parseFloat(document.getElementById('fdRate').value);
+      const time = parseFloat(document.getElementById('fdTime').value);
+      const timeUnit = document.getElementById('fdTimeUnit').value;
+
+      if (isNaN(principal) || isNaN(rate) || isNaN(time)) {
+        alert('Please enter valid numbers');
+        return;
+      }
+
+      let timeInYears = timeUnit === 'months' ? time / 12 : time;
+      const interest = principal * Math.pow((1 + rate/100), timeInYears) - principal;
+      const total = principal + interest;
+
+      const result = document.getElementById('fdResult');
+      result.style.display = 'block';
+      result.innerHTML = `
+        <p>Principal Amount: ₹${principal.toFixed(2)}</p>
+        <p>Interest Rate: ${rate}%</p>
+        <p>Time Period: ${time} ${timeUnit}</p>
+        <p>Total Interest: ₹${interest.toFixed(2)}</p>
+        <p>Total Amount: ₹${total.toFixed(2)}</p>
+      `;
+    }
+  </script>
+</body>
+</html>
